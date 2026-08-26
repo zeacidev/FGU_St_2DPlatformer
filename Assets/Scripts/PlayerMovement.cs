@@ -12,6 +12,9 @@ public class PlayerMovement : MonoBehaviour
     private GroundCollisionCheck groundCol;
     private WallCollisionCheck wallCol;
     private Vector3 startPos;
+    [SerializeField] private AudioClip deathSound;
+    [SerializeField] private AudioClip JumpSound;
+    [SerializeField] private Timer Timer;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -26,12 +29,16 @@ public class PlayerMovement : MonoBehaviour
     void Update()
     {
         horizontalInput = Input.GetAxisRaw("Horizontal");
-        
+        if(horizontalInput != 0)
+        {
+            Timer.StartTime();
+        }
+
         if (Input.GetKeyDown(KeyCode.Space) && groundCol.isGrounded)
         {
             Jump();
         }
-        else if(Input.GetKeyDown(KeyCode.Space) && wallCol.onWall)
+        else if (Input.GetKeyDown(KeyCode.Space) && wallCol.onWall)
         {
             WallJump();
         }
@@ -56,16 +63,20 @@ public class PlayerMovement : MonoBehaviour
     }
     void Jump()
     {
+        AudioManager.instance.PlaySound(JumpSound);
         rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
     }
     void WallJump()
     {
-        Debug.Log("Wall jump");
+        AudioManager.instance.PlaySound(JumpSound);
         int jumpDirection = -wallCol.wallDirection; //Vores jump direction skal være det modsatte af væggens direction
         rb.linearVelocity = new Vector2(jumpDirection*xWallJumpForce, yWallJumpForce);
     }
     public void Respawn()
     {
+        AudioManager.instance.PlaySound(deathSound);
+        Timer.PauseTime();
+        Timer.ResetTime();
         transform.position = startPos; //Vi transporterer vores player tilbage til start positionen
         rb.linearVelocity = Vector2.zero; //Vi nulstiller momementum på playeren 
     }
