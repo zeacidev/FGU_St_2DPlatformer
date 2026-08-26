@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Ground
   - Unhuggable
+  - Coin
   layers:
   - Default
   - TransparentFX
