@@ -19,6 +19,13 @@ public class CoinCollector : MonoBehaviour
     {
         if (other.CompareTag("Coin"))
         {
+            Collider2D coinCollider = other.GetComponent<Collider2D>();
+
+            if (coinCollider != null)
+            {
+                coinCollider.enabled = false;
+            }
+
             AudioManager.instance.PlaySound(coinSound);
             Destroy(other.gameObject);
             CollectCoin();

@@ -1,7 +1,22 @@
+using System.Collections;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
+    [SerializeField] private bool IsMenu = false;
+
+    private bool cheatUnlocked = false;
+    private int codeIndex = 0;
+
+    private readonly KeyCode[] konamiCode = new KeyCode[]
+    {
+        KeyCode.UpArrow, KeyCode.UpArrow,
+        KeyCode.DownArrow, KeyCode.DownArrow,
+        KeyCode.LeftArrow, KeyCode.RightArrow,
+        KeyCode.LeftArrow, KeyCode.RightArrow,
+        KeyCode.B, KeyCode.A,
+    };
+
     public float moveSpeed = 5f;
     [SerializeField] private float jumpForce = 8f;
     public float airSpeed;
@@ -14,7 +29,10 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 startPos;
     [SerializeField] private AudioClip deathSound;
     [SerializeField] private AudioClip JumpSound;
+    [SerializeField] private AudioClip unlockSound;
     [SerializeField] private Timer Timer;
+
+    private bool isDead = false;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -23,28 +41,89 @@ public class PlayerMovement : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         groundCol = GetComponentInChildren<GroundCollisionCheck>();
         wallCol = GetComponentInChildren<WallCollisionCheck>();
+
+        if (IsMenu)
+        {
+            rb.bodyType = RigidbodyType2D.Kinematic;
+            rb.linearVelocity = Vector2.zero;
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
+
+        if (IsMenu && !cheatUnlocked)
+        {
+            CheckKonamiCode();
+
+            horizontalInput = 0;
+            return;
+        }
+
         horizontalInput = Input.GetAxisRaw("Horizontal");
+
+        if (isDead) return;
+
         if(horizontalInput != 0)
         {
-            Timer.StartTime();
+            if (Timer)
+            {
+                Timer.StartTime();
+            }
         }
 
         if (Input.GetKeyDown(KeyCode.Space) && groundCol.isGrounded)
         {
             Jump();
+            if (Timer)
+            {
+                Timer.StartTime();
+            }
         }
         else if (Input.GetKeyDown(KeyCode.Space) && wallCol.onWall)
         {
             WallJump();
         }
     }
+
+    private void CheckKonamiCode()
+    {
+        if (Input.anyKeyDown)
+        {
+            if (Input.GetKeyDown(konamiCode[codeIndex]))
+            {
+                codeIndex++;
+
+                if (codeIndex >= konamiCode.Length)
+                {
+                    UnlockCheatMovement();
+                }
+            }
+            else
+            {
+                codeIndex = 0;
+            }
+        }
+    }
+
+    private void UnlockCheatMovement()
+    {
+        cheatUnlocked = true;
+        rb.bodyType = RigidbodyType2D.Dynamic;
+        AudioManager.instance.PlaySound(unlockSound);
+
+        Debug.Log("Konami Code Unlocked! Go break the menu playground!");
+    }
+
     private void FixedUpdate()
     {
+        if (isDead || (IsMenu && !cheatUnlocked))
+        {
+            rb.linearVelocity = Vector2.zero;
+            return;
+        }
+
         Move();
     }
 
@@ -74,11 +153,35 @@ public class PlayerMovement : MonoBehaviour
     }
     public void Respawn()
     {
+        if (!isDead)
+        {
+            StartCoroutine(RespawnSequence());
+        }
+    }
+
+    private IEnumerator RespawnSequence()
+    {
+        isDead = true;
+
         AudioManager.instance.PlaySound(deathSound);
-        Timer.PauseTime();
-        Timer.ResetTime();
-        transform.position = startPos; //Vi transporterer vores player tilbage til start positionen
-        rb.linearVelocity = Vector2.zero; //Vi nulstiller momementum på playeren 
+        AudioManager.instance.PauseSoundtrack();
+
+        if (Timer)
+        {
+            Timer.PauseTime();
+            Timer.ResetTime();
+        }
+
+        yield return StartCoroutine(MainMenuButton.instance.FadeScreenPublic(1f));
+        yield return new WaitForSeconds(0.5f);
+
+        transform.position = startPos;
+        rb.linearVelocity = Vector2.zero;
+
+        AudioManager.instance.ResumeSoundtrack();
+
+        yield return StartCoroutine(MainMenuButton.instance.FadeScreenPublic(0f));
+        isDead = false;
     }
     private void OnCollisionEnter2D(Collision2D collision)
     {

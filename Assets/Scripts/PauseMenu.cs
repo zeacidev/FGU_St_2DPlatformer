@@ -26,6 +26,7 @@ public class PauseMenu : MonoBehaviour
         pauseMenuObject.SetActive(true);
         Time.timeScale = 0f;
         isPaused = true;
+        AudioManager.instance.PauseSoundtrack();
     }
 
     public void ResumeGame()
@@ -33,6 +34,7 @@ public class PauseMenu : MonoBehaviour
         pauseMenuObject.SetActive(false);
         Time.timeScale = 1f;
         isPaused = false;
+        AudioManager.instance.ResumeSoundtrack();
     }
 
     public void ToggleGame()
@@ -41,11 +43,13 @@ public class PauseMenu : MonoBehaviour
         {
             pauseMenuObject.SetActive(false);
             Time.timeScale = 1f;
+            AudioManager.instance.ResumeSoundtrack();
         }
         else
         {
             pauseMenuObject.SetActive(true);
             Time.timeScale = 0f;
+            AudioManager.instance.PauseSoundtrack();
         }
         isPaused = !isPaused;
     }
