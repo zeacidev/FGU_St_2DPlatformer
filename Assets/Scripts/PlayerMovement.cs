@@ -191,4 +191,22 @@ public class PlayerMovement : MonoBehaviour
         }
            
     }
+
+    public void StopMovementForWin()
+    {
+        isDead = true;
+        rb.linearVelocity = Vector2.zero;
+        rb.bodyType = RigidbodyType2D.Kinematic;
+
+        horizontalInput = 0;
+
+        if (Timer != null)
+        {
+            Timer.PauseTime();
+        }
+        else
+        {
+            Debug.LogError("Player Movement Error: The Timer field slot is empty in the Inspector panel!");
+        }
+    }
 }

@@ -6,7 +6,7 @@ public class TransitionButtonHelper : MonoBehaviour
     [SerializeField] private string targetSceneName;
     [SerializeField] private int targetSceneIndex = -1;
 
-    void Start()
+    void Awake()
     {
         // Automatically hook up our click detector via code
         Button btn = GetComponent<Button>();
@@ -28,6 +28,10 @@ public class TransitionButtonHelper : MonoBehaviour
             else if (targetSceneIndex != -1)
             {
                 MainMenuButton.instance.ChangeSceneByIndex(targetSceneIndex);
+            }
+            else
+            {
+                Debug.LogError("No target");
             }
         }
         else

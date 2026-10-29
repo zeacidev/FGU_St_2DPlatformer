@@ -7,7 +7,7 @@ public class CoinCollector : MonoBehaviour
     [SerializeField] private TextMeshProUGUI coinText;
     [SerializeField] private AudioClip coinSound;
     [SerializeField] private float colorFadeSpeed = 2f;
-    private int coinCount = 0;
+    public int coinCount = 0;
     private Coroutine colorRoutine;
 
     private void Start()

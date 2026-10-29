@@ -69,4 +69,14 @@ public class AudioManager : MonoBehaviour
             soundtrackSource.Play();
         }
     }
+
+    public void UpdateSoundtrackVolume(float value)
+    {
+        soundtrackSource.volume = value;
+    }
+
+    public void UpdateSFXVolume(float value)
+    {
+        sfxSource.volume = value;
+    }
 }
